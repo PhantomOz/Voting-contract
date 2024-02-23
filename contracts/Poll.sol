@@ -4,9 +4,25 @@ pragma solidity ^0.8.19;
 contract Poll {
     string public question; 
     string[] public options;
-    mapping(address => uint) public votes;
+    mapping(string => uint) public votes;
     mapping(address => bool) public voted;
     uint256 public endTime;
+
+
+    modifier pollOpen() {
+        require(block.timestamp < endTime, "Poll is closed");
+        _;
+    }
+
+    modifier notVoted(address _voter) {
+        require(!voted[_voter], "Already voted");
+        _;
+    }
+
+    modifier validOption(uint8 _option) {
+        require(_option < options.length, "Invalid option");
+        _;
+    }
 
     constructor(string memory _question, string[] memory _options, uint256 _duration) {
         require(bytes(_question).length > 0, "Question cannot be empty");
@@ -15,6 +31,12 @@ contract Poll {
         uint256 _endTime = block.timestamp + _duration;
         question = _question;
         options = _options;
-        endTime = _endTime;
+        endTime = _endTime;'
+    }
+
+    function vote(uint8 _option, uint256 _id, address _address) public pollOpen notVoted(_address) validOption(_option) {
+        votes[options[_option]]++;
+        voted[msg.sender] = true;
+        emit PollVoted(_id, msg.sender, _option);
     }
 }

@@ -14,28 +14,9 @@ contract Voting {
 
     // An event to emit when a vote is cast
     event PollVoted(uint pollId, address voter, uint option);
-
-    // A modifier to check if the poll exists
-    modifier pollExists(uint pollId) {
+    
+    modifier pollExists(uint256 pollId) {
         require(pollId < polls.length, "Poll does not exist");
-        _;
-    }
-
-    // A modifier to check if the poll is open
-    modifier pollOpen(uint pollId) {
-        require(block.timestamp < polls[pollId].endTime, "Poll is closed");
-        _;
-    }
-
-    // A modifier to check if the voter has not voted
-    modifier notVoted(uint pollId, address voter) {
-        require(!polls[pollId].voted[voter], "Already voted");
-        _;
-    }
-
-    // A modifier to check if the option is valid
-    modifier validOption(uint pollId, uint option) {
-        require(option < polls[pollId].options.length, "Invalid option");
         _;
     }
 
