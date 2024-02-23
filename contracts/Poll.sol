@@ -31,20 +31,19 @@ contract Poll {
         uint256 _endTime = block.timestamp + _duration;
         question = _question;
         options = _options;
-        endTime = _endTime;'
+        endTime = _endTime;
     }
 
-    function vote(uint8 _option, uint256 _id, address _address) public pollOpen notVoted(_address) validOption(_option) {
+    function vote(uint8 _option, address _address) public pollOpen notVoted(_address) validOption(_option) {
         votes[options[_option]]++;
-        voted[msg.sender] = true;
-        emit PollVoted(_id, msg.sender, _option);
+        voted[_address] = true;
     }
 
-    function viewVotes(uint8 _option) external validOption(_option) returns(uint256){
+    function viewVotes(uint8 _option) external view validOption(_option) returns(uint256){
         return votes[options[_option]];
     }
 
-    function winner() external view returns(string memory) {
+    function viewWinner() external view returns(string memory) {
         require(block.timestamp >= endTime, "Poll is not over yet");
         uint maxVotes = 0;
         string memory winner;
