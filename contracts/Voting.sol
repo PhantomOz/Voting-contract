@@ -5,14 +5,10 @@ import {Poll} from "./Poll.sol";
 
 contract Voting {
     
-
-    // An array to store all the polls
     Poll[] public polls;
 
-    // An event to emit when a new poll is created
-    event PollCreated(uint pollId, string question, string[] options, uint endTime);
+    event PollCreated(uint pollId, string question, string[] options, uint256 endTime);
 
-    // An event to emit when a vote is cast
     event PollVoted(uint pollId, address voter, uint option);
     
     modifier pollExists(uint256 pollId) {
@@ -20,7 +16,6 @@ contract Voting {
         _;
     }
 
-    // A function to create a new poll
     function createPoll(string memory _question, string[] memory _options, uint256 _duration) public {
         Poll newPoll = new Poll(_question, _options, _duration);
         polls.push(newPoll);
@@ -28,29 +23,16 @@ contract Voting {
         emit PollCreated(pollId, _question, _options, (block.timestamp + _duration));
     }
 
-    // A function to vote on a poll
-    function votePoll(uint pollId, uint option) public pollExists(pollId) pollOpen(pollId) notVoted(pollId, msg.sender) validOption(pollId, option) {
-        polls[pollId].votes[option]++;
-        polls[pollId].voted[msg.sender] = true;
+    function votePoll(uint256 _pollId, uint8 _option) public pollExists(_pollId){
+        polls[_pollId].vote(_option, _pollId, msg.sender);
         emit PollVoted(pollId, msg.sender, option);
     }
 
-    // A function to get the total votes for an option
-    function getVotes(uint pollId, uint option) public view pollExists(pollId) validOption(pollId, option) returns (uint) {
-        return polls[pollId].votes[option];
+    function getOptionVotes(uint256 _pollId, uint8 _option) public view pollExists(_pollId) returns (uint256) {
+        return polls[_pollId].viewVotes(_option);
     }
 
-    // A function to get the winner of a poll
-    function getWinner(uint pollId) public view pollExists(pollId) returns (uint) {
-        require(block.timestamp >= polls[pollId].endTime, "Poll is not over yet");
-        uint maxVotes = 0;
-        uint winner = 0;
-        for (uint i = 0; i < polls[pollId].options.length; i++) {
-            if (polls[pollId].votes[i] > maxVotes) {
-                maxVotes = polls[pollId].votes[i];
-                winner = i;
-            }
-        }
-        return winner;
+    function getWinner(uint256 _pollId) public view pollExists(_pollId) returns (string memory) {
+        return polls[_pollId].winner();
     }
 }

@@ -39,4 +39,21 @@ contract Poll {
         voted[msg.sender] = true;
         emit PollVoted(_id, msg.sender, _option);
     }
+
+    function viewVotes(uint8 _option) external validOption(_option) returns(uint256){
+        return votes[options[_option]];
+    }
+
+    function winner() external view returns(string memory) {
+        require(block.timestamp >= endTime, "Poll is not over yet");
+        uint maxVotes = 0;
+        string memory winner;
+        for (uint8 i = 0; i < options.length; i++) {
+            if (votes[options[i]] > maxVotes) {
+                maxVotes = votes[options[i]];
+                winner = options[i];
+            }
+        }
+        return winner;
+    }
 }
